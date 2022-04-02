@@ -48,13 +48,15 @@ def update_half(event):
 
 
 def update_frame(event):
-    progress_slider.set(vid_player.current_frame())
-    t = vid_player.current_duration()
-    img_after = vid_player.frame_img().copy()
+    progress_slider.set(vid_player.current_frame()) # Update time bar
+    process_frame = vid_player.frame_img().copy()
 
-    img_after = ImageTk.PhotoImage(img_after)
-    processed_video.config(image=img_after)
-    processed_video.image = img_after
+    # Add your code here
+
+
+    process_frame = ImageTk.PhotoImage(process_frame)
+    processed_video.config(image=process_frame)
+    processed_video.image = process_frame
 
 
 def comment_sentense(lan, comment):
