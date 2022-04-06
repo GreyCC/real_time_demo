@@ -20,6 +20,7 @@ class TkinterVideo(tk.Label):
 
         self.image_sequence = []
         self.current_imgtk = None
+        self.original_current_img = None
         self.current_img = None
         self.load_thread = None
 
@@ -58,6 +59,7 @@ class TkinterVideo(tk.Label):
         self._current_size = event.width, event.height
 
         if self._paused and self.current_img and self.scaled:
+            self.original_current_img = self.image_sequence[self._frame_number].copy()
             self.current_img = self.image_sequence[self._frame_number].copy().resize(self._current_size)
             self.current_imgtk = ImageTk.PhotoImage(self.current_img)
             self.config(image=self.current_imgtk)
@@ -134,7 +136,7 @@ class TkinterVideo(tk.Label):
         return  self._video_frame_length, self.current_img, self._frame_number, self._frame_rate
 
     def frame_img(self) -> tk.Image:
-        return self.current_img
+        return self.original_current_img
 
     def play(self):
         """ plays the loaded video """
@@ -230,7 +232,7 @@ class TkinterVideo(tk.Label):
                 now = time.time_ns() // 1_000_000 # time in milliseconds
                 delta = now - then  # time difference between current frame and previous frame
                 then = now
-
+                self.original_current_img = self.image_sequence[self._frame_number].copy()
                 self.current_img = self.image_sequence[self._frame_number].copy()
 
                 if self.scaled or len(self._current_size) == 2:
@@ -240,6 +242,9 @@ class TkinterVideo(tk.Label):
 
                 self._frame_number += 1
                 self.event_generate("<<FrameChanged>>")
+
+                if self._frame_number % self._frame_rate == 0:
+                    self.event_generate("<<SecondChanged>>")
 
                 if self._frame_number % self._frame_rate/2 == 0:
                     self.event_generate("<<halfSecondChanged>>")
