@@ -4,6 +4,7 @@ import time
 import tkinter as tk
 import numpy
 
+from pytorchyolo import models, detect
 from tkVideoPlayer import TkinterVideo
 from utils import *
 from tkinter.constants import RIDGE, SUNKEN
@@ -27,19 +28,7 @@ def update_duration(event):
 
 
 def update_half(event):
-     pass
-
-
-def update_frame(event):
-    progress_slider.set(vid_player.current_frame()) # Update time bar
-    process_frame = vid_player.frame_img().copy()
-
-    # Add your code here
-
-
-    process_frame = ImageTk.PhotoImage(process_frame)
-    processed_video.config(image=process_frame)
-    processed_video.image = process_frame
+    pass
 
 
 def comment_sentense(lan, comment):
@@ -85,6 +74,7 @@ def load_video(evt):
     sentence_text.delete('1.0', tk.END)
     # players_encode, players_list = load_players('database/' + w.get(index)[:-4])
 
+
 def seek(value):
     """ used to seek a specific timeframe """
     vid_player.seekframe(int(value))
@@ -117,11 +107,11 @@ def detect_bool():
         track_btn["text"] = "Player track"
         track_btn.config(bg="#DDDDDD")
     if obj_det:
-        dectect_btn["text"] = "Stop detection"
-        dectect_btn.config(bg="red")
+        detect_btn["text"] = "Stop detection"
+        detect_btn.config(bg="red")
     else:
-        dectect_btn["text"] = "Object detection"
-        dectect_btn.config(bg="#DDDDDD")
+        detect_btn["text"] = "Object detection"
+        detect_btn.config(bg="#DDDDDD")
 
 
 def track_bool():
@@ -129,8 +119,8 @@ def track_bool():
     obj_track = not obj_track
     if obj_det:
         obj_det = not obj_det
-        dectect_btn["text"] = "Object detection"
-        dectect_btn.config(bg="#DDDDDD")
+        detect_btn["text"] = "Object detection"
+        detect_btn.config(bg="#DDDDDD")
     if obj_track:
         track_btn["text"] = "Stop tracking"
         track_btn.config(bg="red")
@@ -181,6 +171,43 @@ def start_tts(quote):
     tts.startLoop()
 
 
+#Eric button
+def track_tune_1():
+    pass
+
+
+def track_tune_2():
+    pass
+
+
+def track_tune_3():
+    pass
+
+
+def track_tune_4():
+    pass
+
+
+def update_frame(event):
+    global colors
+    progress_slider.set(vid_player.current_frame())  # Update time bar
+    process_frame = vid_player.frame_img().copy()
+
+    if obj_track:
+        # Add your code here
+        pass
+
+    if obj_det:
+        process_frame = numpy.asarray(process_frame)
+        result = detect.detect_image(model, process_frame)
+        process_frame = draw_box(process_frame, result, colors)
+        process_frame = Image.fromarray(process_frame)
+
+    process_frame = ImageTk.PhotoImage(process_frame)
+    processed_video.config(image=process_frame)
+    processed_video.image = process_frame
+
+
 if __name__ == "__main__":
     language = 'english'
     lines = []
@@ -189,9 +216,9 @@ if __name__ == "__main__":
     while True:
         root = tk.Tk()
         root.title("Tkinter media")
-        # root.attributes('-zoomed', True)  # Ubuntu
-        root.state('zoomed')  # Window
-        root.resizable(0, 0)  # Window
+        root.attributes('-zoomed', True)  # Ubuntu
+        # root.state('zoomed')  # Window
+        # root.resizable(0, 0)  # Window
         root.update()
 
         root_h = root.winfo_height()
@@ -199,6 +226,28 @@ if __name__ == "__main__":
 
         box_w = (root_w - 200) / 2  # video box width
         box_h = box_w * 9 / 16  # video box height
+
+        # Eric button
+        obj_det = False
+        detect_btn = tk.Button(root, text="Object Detect", command=detect_bool, bg="#DDDDDD", font=20)
+        detect_btn.place(x=150 + box_w + 300, y=80 + box_h + 30, width=150)
+
+        obj_track = False
+        track_btn = tk.Button(root, text="Player Track", command=track_bool, bg="#DDDDDD", font=20)
+        track_btn.place(x=150 + box_w + 480, y=80 + box_h + 30, width=150)
+
+        track_para_1 = tk.Button(root, text="1", command=track_tune_1, bg="#DDDDDD", font=20)
+        track_para_1.place(x=150 + box_w + 300, y=80 + box_h + 80)
+
+        track_para_2 = tk.Button(root, text="2", command=track_tune_2, bg="#DDDDDD", font=20)
+        track_para_2.place(x=150 + box_w + 350, y=80 + box_h + 80)
+
+        track_para_3 = tk.Button(root, text="3", command=track_tune_3, bg="#DDDDDD", font=20)
+        track_para_3.place(x=150 + box_w + 400, y=80 + box_h + 80)
+
+        track_para_4 = tk.Button(root, text="4", command=track_tune_4, bg="#DDDDDD", font=20)
+        track_para_4.place(x=150 + box_w + 450, y=80 + box_h + 80)
+
 
         load_widget()
         list = call_from_folder("Video")  # Find all files in the folder
@@ -233,27 +282,6 @@ if __name__ == "__main__":
         vid_player.bind("<<FrameChanged>>", update_frame)
         vid_player.bind("<<Ended>>", video_ended)
 
-        #Eric tracking button
-        obj_det = False
-        dectect_btn = tk.Button(root, text="Object Detect", command=detect_bool, bg="#DDDDDD", font=20)
-        dectect_btn.place(x=150 + box_w + 300, y=80 + box_h + 30, width=150)
-
-        obj_track = False
-        track_btn = tk.Button(root, text="Player Track", command=track_bool, bg="#DDDDDD", font=20)
-        track_btn.place(x=150 + box_w + 480, y=80 + box_h + 30, width=150)
-
-        track_para_1 = tk.Button(root, text="1", command=track_bool, bg="#DDDDDD", font=20)
-        track_para_1.place(x=150 + box_w + 300, y=80 + box_h + 80)
-
-        track_para_2 = tk.Button(root, text="2", command=track_bool, bg="#DDDDDD", font=20)
-        track_para_2.place(x=150 + box_w + 350, y=80 + box_h + 80)
-
-        track_para_3 = tk.Button(root, text="3", command=track_bool, bg="#DDDDDD", font=20)
-        track_para_3.place(x=150 + box_w + 400, y=80 + box_h + 80)
-
-        track_para_4 = tk.Button(root, text="4", command=track_bool, bg="#DDDDDD", font=20)
-        track_para_4.place(x=150 + box_w + 450, y=80 + box_h + 80)
-
         button_w = int(root_w * 0.2)
         button_h = root_h - box_h - 220
         action_label = tk.Label(root, text='Action', font='Verdana 12 bold')
@@ -268,6 +296,10 @@ if __name__ == "__main__":
 
         sentence_text = tk.Text(root, bg='#FDFDFD', relief=SUNKEN, font='Verdana 14')
         sentence_text.place(x=150 + button_w + 50, y=80 + box_h + 130, width=sentence_w, height=button_h)
+
+        class_no = sum(1 for line in open('model/coco.name'))
+        colors = create_color_by_class(class_no)
+        model = models.load_model("model/yolov4.cfg", "model/yolov4.weights")
 
         voice_list()
         tts = pyttsx3.init()
